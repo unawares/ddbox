@@ -1,8 +1,6 @@
 import logging
-import os
-import platform
 from subprocess import PIPE, Popen
-from typing import List, Tuple
+from typing import Tuple
 
 from ddbox.docking.utils.vina import (
     download_if_needed,
@@ -11,7 +9,6 @@ from ddbox.docking.utils.vina import (
     get_pdbqt_filepath,
     get_vina_filepath,
 )
-from ddbox.utils import get_random_uuid_hex
 
 logger = logging.getLogger(__name__)
 
