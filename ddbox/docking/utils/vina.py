@@ -2,7 +2,6 @@ import logging
 import os
 import platform
 import time
-from io import BytesIO
 from subprocess import PIPE, Popen
 
 import requests
@@ -76,7 +75,11 @@ def download_if_needed(receptor_id: str):
 def get_vina_filepath() -> str:
     system_name = platform.system()
     if system_name == 'Linux':
-        return os.path.join(BINARIES_DIR, 'vina_1.2.5_linux_x86_64')
+        machine_name = platform.machine()
+        if machine_name == 'aarch64':
+            return os.path.join(BINARIES_DIR, 'vina_1.2.5_linux_aarch64')
+        else:
+            return os.path.join(BINARIES_DIR, 'vina_1.2.5_linux_x86_64')
     if system_name == 'Darwin':
         return os.path.join(BINARIES_DIR, 'vina_1.2.5_mac_x86_64')
     else:
