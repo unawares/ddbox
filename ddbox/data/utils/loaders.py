@@ -37,8 +37,8 @@ class MosesDataLoader:
 
     def _load_info(self):
         response = requests.get(MOSES_INFO_API_URL, params={
-            'tags': ','.join(self.tags),
-            'attributes': ','.join(self.attributes),
+            'tags': ','.join(sorted(set(self.tags))),
+            'attributes': ','.join(sorted(set(self.attributes))),
         })
 
         if response.status_code != 200:
@@ -47,7 +47,7 @@ class MosesDataLoader:
         self._info = response.json()
 
     def _get_cache_path(self):
-        text = ''.join([str(self.batch_size), *self.tags, *self.attributes])
+        text = ''.join(sorted([str(self.batch_size), *self.tags, *self.attributes]))
         h = get_hash(text.encode()).hex()
         return os.path.join(self.cache_dir, h)
 
@@ -56,17 +56,30 @@ class MosesDataLoader:
         return os.path.join(cache_path, filename)
 
     def _fetch(self, offset: int, limit: int):
+        sorted_attributes = sorted(set(self.attributes))
+
         response = requests.get(MOSES_API_URL, params={
             'offset': offset,
             'limit': limit,
-            'tag': self.split,
-            'attributes': ','.join(self.attributes),
+            'tags': ','.join(sorted(set(self.tags))),
+            'attributes': ','.join(sorted_attributes),
         })
 
         if response.status_code != 200:
             raise Exception(response.text)
 
-        return response.json()['records']
+        sorted_records = response.json()['records']
+
+        records = []
+
+        for sorted_record in sorted_records:
+            record = []
+            for attribute in self.attributes:
+                index = sorted_attributes.index(attribute)
+                record.append(sorted_record[index])
+            records.append(record)
+
+        return records
 
     def _check_if_downloaded(self):
         limit = self.batch_size
