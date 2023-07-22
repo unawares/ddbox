@@ -46,3 +46,32 @@ def vina_docking(receptor_id: str, ligand_smiles: str, center: Tuple[float, floa
     *name, ext = ligand_path.split('.')
     name = '.'.join(name)
     return '%s_out.%s' % (name, ext)
+
+
+def vina_docking_files(receptor_path: str, ligand_path: str, config_path: str, center: Tuple[float, float, float] | None = None, size: Tuple[float, float, float] | None = None):
+    command = [
+        get_vina_filepath(),
+        '--receptor', receptor_path,
+        '--ligand', ligand_path,
+        '--config', config_path,
+    ]
+    if center is not None:
+        command.extend([
+            '--center_x', str(center[0]),
+            '--center_y', str(center[1]),
+            '--center_z', str(center[2]),
+        ])
+    if size is not None:
+        command.extend([
+            '--size_x', str(size[0]),
+            '--size_y', str(size[1]),
+            '--size_z', str(size[2]),
+        ])
+    p = Popen(command, stdout=PIPE, stderr=PIPE)
+    output, err = p.communicate()
+    if p.returncode != 0:
+        raise Exception(err.decode())
+
+    *name, ext = ligand_path.split('.')
+    name = '.'.join(name)
+    return '%s_out.%s' % (name, ext)
